@@ -5,7 +5,6 @@ import (
 	"testing"
 )
 
-// A few mock sessions for testing
 var (
 	mockSession1 = Session{
 		Name:        "test-session-1",

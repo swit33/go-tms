@@ -17,7 +17,7 @@ func RunDaemon() {
 	file, err := createLockFile()
 	if err != nil {
 		fmt.Printf("Error: %v\n", err)
-		return // Exit if we can't get the lock.
+		return
 	}
 	defer releaseLockFile(file)
 	cfg, err := config.LoadConfig()
@@ -37,7 +37,6 @@ func RunDaemon() {
 			fmt.Printf("Received signal '%s'. Shutting down daemon...\n", sig.String())
 			return
 		case <-ticker.C:
-			// sendMsg("Autosaving sessions...")
 			saveSessions()
 		}
 	}

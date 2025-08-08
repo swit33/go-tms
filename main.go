@@ -12,7 +12,6 @@ import (
 
 func main() {
 
-	// Define a boolean flag for daemon mode
 	daemonMode := flag.Bool("d", false, "Run in daemon mode with autosave enabled")
 	flag.Parse()
 

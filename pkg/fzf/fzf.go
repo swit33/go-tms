@@ -59,7 +59,7 @@ func Run(entries []string, cfg *config.Config) (string, error) {
 	output, err := cmd.Output()
 	if err != nil {
 		if exitErr, ok := err.(*exec.ExitError); ok && exitErr.ExitCode() == 1 {
-			return "", nil // Return no output and no error for cancellation
+			return "", nil
 		}
 		if exitErr, ok := err.(*exec.ExitError); ok && exitErr.ExitCode() == 130 {
 			return strings.TrimSpace(string(output)), nil

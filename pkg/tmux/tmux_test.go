@@ -1,10 +1,8 @@
 package tmux
 
 import (
-	// "fmt"
 	"go-tms/pkg/interfaces"
 	"go-tms/pkg/session"
-	// "strings"
 	"testing"
 )
 

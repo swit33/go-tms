@@ -47,11 +47,9 @@ func LoadConfig() (Config, error) {
 
 	configFile, err := os.Open(configFilePath)
 	if err != nil {
-		// If the file does not exist, return the default config without creating the file.
 		if os.IsNotExist(err) {
 			return config, nil
 		}
-		// Return other errors.
 		return config, err
 	}
 	defer configFile.Close()

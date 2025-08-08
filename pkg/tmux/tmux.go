@@ -138,17 +138,6 @@ func SwitchSession(sessionName string, runner interfaces.Runner) error {
 	return nil
 }
 
-// func CheckIfSessionExists(sessionName string) bool {
-// 	cmd := exec.Command("tmux", "list-sessions", "-F", "#{session_name}")
-// 	output, err := cmd.Output()
-// 	if err != nil {
-// 		return false
-// 	}
-//
-// 	lines := strings.Split(strings.TrimSpace(string(output)), "\n")
-// 	return slices.Contains(lines, sessionName)
-// }
-
 func CheckIfSessionExists(ispath bool, identifier string) (string, error) {
 	cmd := exec.Command("tmux", "list-sessions", "-F", "#{session_name}|#{session_path}")
 	output, err := cmd.Output()
