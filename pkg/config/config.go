@@ -3,30 +3,41 @@ package config
 import (
 	"gopkg.in/yaml.v3"
 	"os"
-	"os/user"
 	"path/filepath"
 )
 
 var configPath string = filepath.Join(".config", "go-tms", "config.yaml")
 
 type Config struct {
-	AutoSaveEnabled         bool `yaml:"auto-save"`
-	AutoSaveIntervalMinutes int  `yaml:"auto-save-interval-minutes"`
+	AutoSaveIntervalMinutes int    `yaml:"auto-save-interval-minutes"`
+	FZFBindNew              string `yaml:"fzf-bind-new"`
+	FZFBindDelete           string `yaml:"fzf-bind-delete"`
+	FZFBindInteractive      string `yaml:"fzf-bind-interactive"`
+	FZFBindSave             string `yaml:"fzf-bind-save"`
+	FZFPrompt               string `yaml:"fzf-prompt"`
+	FZFOpts                 string `yaml:"fzf-env"`
+	ZoxideOpts              string `yaml:"zoxide-env"`
 }
 
 func GetConfigPath() (string, error) {
-	currentUser, err := user.Current()
+	configDir, err := os.UserConfigDir()
 	if err != nil {
 		return "", err
 	}
-	configAbsPath := filepath.Join(currentUser.HomeDir, configPath)
+	configAbsPath := filepath.Join(configDir, configPath)
 	return configAbsPath, nil
 }
 
 func LoadConfig() (Config, error) {
 	config := Config{
-		AutoSaveEnabled:         true,
-		AutoSaveIntervalMinutes: 5,
+		AutoSaveIntervalMinutes: 10,
+		FZFBindNew:              "ctrl-n",
+		FZFBindDelete:           "ctrl-d",
+		FZFBindInteractive:      "ctrl-i",
+		FZFBindSave:             "ctrl-s",
+		FZFPrompt:               "Sessions> ",
+		FZFOpts:                 "--no-sort --reverse",
+		ZoxideOpts:              "--layout=reverse --style=full --border=bold --border=rounded --margin=3%",
 	}
 
 	configFilePath, err := GetConfigPath()

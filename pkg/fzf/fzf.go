@@ -2,27 +2,12 @@ package fzf
 
 import (
 	"fmt"
+	"go-tms/pkg/config"
 	"go-tms/pkg/session"
 	"os"
 	"os/exec"
 	"strings"
 )
-
-var fzfOpts = []string{
-	"--no-sort",
-	"--reverse",
-}
-
-var fzfBinds = []string{
-	"--bind",
-	"ctrl-n:become(echo 'gotms_act_new:{}')",
-	"--bind",
-	"ctrl-d:become(echo 'gotms_act_delete:{}')",
-	"--bind",
-	"ctrl-i:become(echo 'gotms_act_interactive:{}')",
-	"--bind",
-	"ctrl-s:become(echo 'gotms_act_save:{}')",
-}
 
 var fzfHeader = []string{
 	"--header",
@@ -31,13 +16,15 @@ var fzfHeader = []string{
 
 var fzfPrompt string = "Sessions> "
 
+const ActionPrefix = "gotms_act_"
+
 type Action string
 
 const (
-	ActionNew         Action = "gotms_act_new"
-	ActionDelete      Action = "gotms_act_delete"
-	ActionInteractive Action = "gotms_act_interactive"
-	ActionSave        Action = "gotms_act_save"
+	ActionNew         Action = ActionPrefix + "new"
+	ActionDelete      Action = ActionPrefix + "delete"
+	ActionInteractive Action = ActionPrefix + "interactive"
+	ActionSave        Action = ActionPrefix + "save"
 )
 
 type Result struct {
@@ -47,15 +34,28 @@ type Result struct {
 	SessionName string
 }
 
-func Run(entries []string) (string, error) {
+func Run(entries []string, cfg *config.Config) (string, error) {
+	var binds []string
+	binds = append(binds,
+		fmt.Sprintf("--bind=%s:become(echo '%s:{}')", cfg.FZFBindNew, ActionNew))
+	binds = append(binds,
+		fmt.Sprintf("--bind=%s:become(echo '%s:{}')", cfg.FZFBindDelete, ActionDelete))
+	binds = append(binds,
+		fmt.Sprintf("--bind=%s:become(echo '%s:{}')", cfg.FZFBindInteractive, ActionInteractive))
+	binds = append(binds,
+		fmt.Sprintf("--bind=%s:become(echo '%s:{}')", cfg.FZFBindSave, ActionSave))
+	var header []string
+	header = append(header, "--header")
+	header = append(header,
+		fmt.Sprintf("<%s>: new session\n<%s>: delete session\n<%s>: interactive search\n<%s>: save session",
+			cfg.FZFBindNew, cfg.FZFBindDelete, cfg.FZFBindInteractive, cfg.FZFBindSave))
 	args := []string{}
-	args = append(args, fzfOpts...)
-	args = append(args, fzfBinds...)
-	args = append(args, "--prompt", fzfPrompt)
-	args = append(args, fzfHeader...)
+	args = append(args, strings.Fields(cfg.FZFOpts)...)
+	args = append(args, binds...)
+	args = append(args, "--prompt", cfg.FZFPrompt)
+	args = append(args, header...)
 	cmd := exec.Command("fzf", args...)
 	cmd.Stdin = strings.NewReader(strings.Join(entries, "\n"))
-
 	output, err := cmd.Output()
 	if err != nil {
 		if exitErr, ok := err.(*exec.ExitError); ok && exitErr.ExitCode() == 1 {
@@ -74,12 +74,12 @@ func Run(entries []string) (string, error) {
 	return strings.TrimSpace(string(output)), nil
 }
 
-func RunSessions(s []session.Session) (Result, error) {
+func RunSessions(s []session.Session, cfg *config.Config) (Result, error) {
 	entries := make([]string, 0)
 	for _, s := range s {
 		entries = append(entries, s.Name)
 	}
-	result, err := Run(entries)
+	result, err := Run(entries, cfg)
 	if err != nil {
 		return Result{}, err
 	}
@@ -88,7 +88,7 @@ func RunSessions(s []session.Session) (Result, error) {
 		os.Exit(0)
 	}
 
-	if strings.HasPrefix(result, "gotms_act_") {
+	if strings.HasPrefix(result, ActionPrefix) {
 		parts := strings.Split(result, ":")
 		return Result{IsAction: true, Action: Action(parts[0]), Arg: parts[1]}, nil
 	}
@@ -96,10 +96,15 @@ func RunSessions(s []session.Session) (Result, error) {
 	return Result{IsAction: false, SessionName: sessionName}, nil
 }
 
-func RunZoxide() (Result, error) {
+func RunZoxide(cfg *config.Config) (Result, error) {
 	cmd := exec.Command("zoxide", "query", "-i")
+	cmd.Env = os.Environ()
+	cmd.Env = append(cmd.Env, "_ZO_FZF_OPTS="+cfg.ZoxideOpts)
 	output, err := cmd.Output()
 	if err != nil {
+		if exitErr, ok := err.(*exec.ExitError); ok && exitErr.ExitCode() == 130 {
+			os.Exit(0)
+		}
 		return Result{}, fmt.Errorf("zoxide command failed: %v", err)
 	}
 	path := strings.TrimSpace(string(output))

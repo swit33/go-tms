@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"gopkg.in/yaml.v3"
 	"os"
-	"os/user"
 	"path/filepath"
 	"slices"
 )
@@ -29,11 +28,11 @@ type Session struct {
 var sessionStorePath string = filepath.Join(".tmux", "go-tms", "sessions.yaml")
 
 func GetSessionStorePath() (string, error) {
-	currentUser, err := user.Current()
+	configDir, err := os.UserConfigDir()
 	if err != nil {
 		return "", err
 	}
-	sessionStoreAbsPath := filepath.Join(currentUser.HomeDir, sessionStorePath)
+	sessionStoreAbsPath := filepath.Join(configDir, sessionStorePath)
 	return sessionStoreAbsPath, nil
 }
 
@@ -111,9 +110,8 @@ func GetSessionByPath(path string, s []Session) (*Session, error) {
 }
 
 func CombineSessions(s1 []Session, s2 []Session) ([]Session, error) {
-	sessions := make([]Session, 0, len(s1)+len(s2)) // Pre-allocate capacity
+	sessions := make([]Session, 0, len(s1)+len(s2))
 
-	// Helper to check for existence
 	contains := func(list []Session, name string) bool {
 		for _, sess := range list {
 			if sess.Name == name {
@@ -128,7 +126,7 @@ func CombineSessions(s1 []Session, s2 []Session) ([]Session, error) {
 	}
 
 	for _, s := range s2 {
-		if !contains(s1, s.Name) { // Check against the original s1
+		if !contains(s1, s.Name) {
 			sessions = append(sessions, s)
 		}
 	}

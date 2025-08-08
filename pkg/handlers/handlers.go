@@ -3,52 +3,73 @@ package handlers
 import (
 	"bufio"
 	"fmt"
+	"go-tms/pkg/config"
 	"go-tms/pkg/fzf"
 	"go-tms/pkg/interfaces"
 	"go-tms/pkg/session"
 	"go-tms/pkg/tmux"
 	"os"
+	"path/filepath"
+	"regexp"
+	"strings"
 )
 
-func HandleResult(result fzf.Result, sessions *[]session.Session) error {
+func HandleResult(result fzf.Result, sessions *[]session.Session, cfg *config.Config) error {
 	if result.IsAction {
 		switch result.Action {
 		case fzf.ActionNew:
-			return handleActionNew(sessions)
+			cwd, err := os.Getwd()
+			if err != nil {
+				return err
+			}
+			return handleActionNew(cwd, sessions)
 		case fzf.ActionDelete:
 			return handleActionDelete(result, sessions)
 		case fzf.ActionInteractive:
-			return handleZoxide(sessions)
+			return handleZoxide(sessions, cfg)
 		case fzf.ActionSave:
 			return session.SaveSessionsToDisk(*sessions)
 		}
 	} else {
-		return handleSessionLogic(result.SessionName, sessions)
+		return handleSessionLogic(false, result.SessionName, sessions)
 	}
 	return nil
 }
 
-func handleSessionLogic(identifier string, sessions *[]session.Session) error {
+func handleSessionLogic(ispath bool, identifier string, sessions *[]session.Session) error {
 	runner := interfaces.OsRunner{}
-	if tmux.CheckIfSessionExists(identifier) {
-		return tmux.SwitchSession(identifier, runner)
+
+	sessionName, err := tmux.CheckIfSessionExists(ispath, identifier)
+	if err != nil {
+		return err
+	}
+	if sessionName != "" {
+		return tmux.SwitchSession(sessionName, runner)
 	}
 	sessionInstance, err := session.GetSessionByName(identifier, *sessions)
 	if err == nil {
-		if err := tmux.RestoreSession(sessionInstance, interfaces.OsRunner{}); err != nil {
-			return err
-		}
-		tmuxSessions, err := tmux.ListSessions()
-		if err != nil {
-			return err
-		}
-		*sessions, err = session.CombineSessions(*sessions, tmuxSessions)
-		if err != nil {
-			return err
-		}
-		return session.SaveSessionsToDisk(*sessions)
+		return tmux.RestoreSession(sessionInstance, interfaces.OsRunner{})
 	}
-	sessionName, err := tmux.CreateNewSession("", identifier, runner)
+
+	return handleActionNew(identifier, sessions)
+}
+
+func handleZoxide(sessions *[]session.Session, cfg *config.Config) error {
+	result, err := fzf.RunZoxide(cfg)
+	if err != nil {
+		return err
+	}
+	return handleSessionLogic(true, result.Arg, sessions)
+}
+
+func handleActionNew(path string, sessions *[]session.Session) error {
+	runner := interfaces.OsRunner{}
+
+	name, err := FindUniqueSessionName(path, *sessions)
+	if err != nil {
+		return err
+	}
+	sessionName, err := tmux.CreateNewSession(name, path, runner)
 	if err != nil {
 		return err
 	}
@@ -59,39 +80,7 @@ func handleSessionLogic(identifier string, sessions *[]session.Session) error {
 	if err != nil {
 		return err
 	}
-	*sessions, err = session.CombineSessions(*sessions, tmuxSessions)
-	if err != nil {
-		return err
-	}
-	return session.SaveSessionsToDisk(*sessions)
-}
-
-func handleZoxide(sessions *[]session.Session) error {
-	result, err := fzf.RunZoxide()
-	if err != nil {
-		return err
-	}
-	return handleSessionLogic(result.Arg, sessions)
-}
-
-func handleActionNew(sessions *[]session.Session) error {
-	runner := interfaces.OsRunner{}
-	cwd, err := os.Getwd()
-	if err != nil {
-		return err
-	}
-	name, err := tmux.CreateNewSession("", cwd, runner)
-	if err != nil {
-		return err
-	}
-	if err := tmux.SwitchSession(name, runner); err != nil {
-		return err
-	}
-	tmuxSessions, err := tmux.ListSessions()
-	if err != nil {
-		return err
-	}
-	*sessions, err = session.CombineSessions(*sessions, tmuxSessions)
+	*sessions, err = session.CombineSessions(tmuxSessions, *sessions)
 	if err != nil {
 		return err
 	}
@@ -100,19 +89,57 @@ func handleActionNew(sessions *[]session.Session) error {
 
 func handleActionDelete(result fzf.Result, sessions *[]session.Session) error {
 	var err error
-	if session.CheckIfSessionExists(result.Arg, *sessions) {
-		*sessions, err = session.DeleteSession(result.Arg, *sessions)
+	sessionName := result.Arg
+	if session.CheckIfSessionExists(sessionName, *sessions) {
+		*sessions, err = session.DeleteSession(sessionName, *sessions)
 		if err != nil {
 			return err
 		}
 	}
-	if tmux.CheckIfSessionExists(result.Arg) {
-		err = tmux.DeleteSession(result.Arg)
+	sessionName, err = tmux.CheckIfSessionExists(false, sessionName)
+	if err != nil {
+		return err
+	}
+	if sessionName != "" {
+		err = tmux.DeleteSession(sessionName)
 		if err != nil {
 			return err
 		}
 	}
+
 	return session.SaveSessionsToDisk(*sessions)
+}
+
+func FindUniqueSessionName(startPath string, savedSessions []session.Session) (string, error) {
+	path := startPath
+	var nameParts []string
+
+	for {
+		namePart := filepath.Base(path)
+		nameParts = append([]string{namePart}, nameParts...)
+
+		sessionName := strings.Join(nameParts, "-")
+
+		re := regexp.MustCompile(`[^a-zA-Z0-9_-]`)
+		sanitizedName := re.ReplaceAllString(sessionName, "_")
+
+		tmuxName, err := tmux.CheckIfSessionExists(false, sanitizedName)
+		if err != nil {
+			return "", err
+		}
+
+		sessionExistsOnDisk := session.CheckIfSessionExists(sanitizedName, savedSessions)
+
+		if tmuxName == "" && !sessionExistsOnDisk {
+			return sanitizedName, nil
+		}
+
+		parentPath := filepath.Dir(path)
+		if parentPath == path {
+			return "", fmt.Errorf("could not find a unique session name for path: %s", startPath)
+		}
+		path = parentPath
+	}
 }
 
 func HandleError(err error) {

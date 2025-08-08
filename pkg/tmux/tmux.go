@@ -4,13 +4,9 @@ import (
 	"fmt"
 	"go-tms/pkg/interfaces"
 	"go-tms/pkg/session"
-	"math/rand"
 	"os/exec"
-	"path"
-	"slices"
 	"strconv"
 	"strings"
-	"time"
 )
 
 func ListSessions() ([]session.Session, error) {
@@ -83,20 +79,6 @@ func ListSessions() ([]session.Session, error) {
 
 func CreateNewSession(sessionName string, directory string, runner interfaces.Runner) (string, error) {
 	var cmd *exec.Cmd
-	if sessionName == "" {
-		path := path.Base(directory)
-		path = strings.ReplaceAll(path, " ", "_")
-		path = strings.ReplaceAll(path, ":", "_")
-		path = strings.ReplaceAll(path, "/", "_")
-		path = strings.ReplaceAll(path, "\\", "_")
-		path = strings.ReplaceAll(path, "*", "_")
-		path = strings.ReplaceAll(path, "?", "_")
-		path = strings.ReplaceAll(path, "\"", "_")
-		path = strings.ReplaceAll(path, "%", "")
-		rand.Seed(time.Now().UnixNano())
-		randomNum := rand.Intn(9000) + 1000
-		sessionName = fmt.Sprintf("%s_%04d", path, randomNum)
-	}
 	cmd = exec.Command("tmux", "new-session", "-d", "-s", sessionName, "-c", directory)
 	if err := runner.Run(cmd); err != nil {
 		return "", fmt.Errorf("failed to create new session: %v", err)
@@ -156,15 +138,44 @@ func SwitchSession(sessionName string, runner interfaces.Runner) error {
 	return nil
 }
 
-func CheckIfSessionExists(sessionName string) bool {
-	cmd := exec.Command("tmux", "list-sessions", "-F", "#{session_name}")
+// func CheckIfSessionExists(sessionName string) bool {
+// 	cmd := exec.Command("tmux", "list-sessions", "-F", "#{session_name}")
+// 	output, err := cmd.Output()
+// 	if err != nil {
+// 		return false
+// 	}
+//
+// 	lines := strings.Split(strings.TrimSpace(string(output)), "\n")
+// 	return slices.Contains(lines, sessionName)
+// }
+
+func CheckIfSessionExists(ispath bool, identifier string) (string, error) {
+	cmd := exec.Command("tmux", "list-sessions", "-F", "#{session_name}|#{session_path}")
 	output, err := cmd.Output()
 	if err != nil {
-		return false
+		return "", err
 	}
 
-	lines := strings.Split(strings.TrimSpace(string(output)), "\n")
-	return slices.Contains(lines, sessionName)
+	lines := strings.SplitSeq(strings.TrimSpace(string(output)), "\n")
+	for line := range lines {
+		parts := strings.Split(line, "|")
+		if len(parts) != 2 {
+			continue
+		}
+
+		sessionName := parts[0]
+		sessionPath := parts[1]
+		if ispath {
+			if sessionPath == identifier {
+				return sessionName, nil
+			}
+		} else {
+			if sessionName == identifier {
+				return sessionName, nil
+			}
+		}
+	}
+	return "", nil
 }
 
 func DeleteSession(sessionName string) error {
