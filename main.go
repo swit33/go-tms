@@ -17,7 +17,6 @@ func main() {
 	flag.Parse()
 
 	if *daemonMode {
-		// Run the daemon logic and exit main
 		daemon.RunDaemon()
 		return
 	}

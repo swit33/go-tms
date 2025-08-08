@@ -28,11 +28,11 @@ type Session struct {
 var sessionStorePath string = filepath.Join(".tmux", "go-tms", "sessions.yaml")
 
 func GetSessionStorePath() (string, error) {
-	configDir, err := os.UserConfigDir()
+	homePath, err := os.UserHomeDir()
 	if err != nil {
 		return "", err
 	}
-	sessionStoreAbsPath := filepath.Join(configDir, sessionStorePath)
+	sessionStoreAbsPath := filepath.Join(homePath, sessionStorePath)
 	return sessionStoreAbsPath, nil
 }
 
