@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"go-tms/pkg/interfaces"
 	"go-tms/pkg/session"
+	"os"
 	"os/exec"
 	"strconv"
 	"strings"
@@ -37,6 +38,25 @@ func ListSessions() ([]session.Session, error) {
 		paneIndex := parts[3]
 		paneCommand := parts[4]
 		panePath := parts[5]
+
+		userHomeDir, err := os.UserHomeDir()
+		if err != nil {
+			return nil, fmt.Errorf("failed to get user home dir: %v", err)
+		}
+
+		if sessionPath == userHomeDir {
+			continue
+		}
+		if sessionPath == "/dev/null" {
+			continue
+		}
+		if sessionPath == "/tmp" {
+			continue
+		}
+
+		if sessionName == "go-tms-startup" {
+			continue
+		}
 
 		sessionInst, ok := sessionsMap[sessionName]
 		if !ok {
@@ -98,7 +118,7 @@ func RestoreSession(s *session.Session, runner interfaces.Runner) error {
 	for i, window := range s.Windows {
 		if i != 0 {
 			cmd := exec.Command("tmux", "new-window",
-				"-t", strconv.Itoa(i+1), "-c", window.Panes[0].CurrentPath)
+				"-t", s.Name+":"+strconv.Itoa(i+1), "-c", window.Panes[0].CurrentPath)
 			if err := runner.Run(cmd); err != nil {
 				return fmt.Errorf("failed to create new window: %v", err)
 			}
@@ -107,21 +127,21 @@ func RestoreSession(s *session.Session, runner interfaces.Runner) error {
 			if j == 0 {
 				if i == 0 {
 					cmd := exec.Command("tmux", "send-keys",
-						"-t", strconv.Itoa(i+1)+"."+strconv.Itoa(j+1), "cd "+pane.CurrentPath, "C-m")
+						"-t", s.Name+":"+strconv.Itoa(i+1)+"."+strconv.Itoa(j+1), "cd "+pane.CurrentPath, "C-m")
 					if err := runner.Run(cmd); err != nil {
 						return fmt.Errorf("failed to set pane path: %v", err)
 					}
 				}
 			} else {
 				cmd := exec.Command("tmux", "split-window",
-					"-t", strconv.Itoa(i+1)+"."+strconv.Itoa(j), "-c", pane.CurrentPath)
+					"-t", s.Name+":"+strconv.Itoa(i+1)+"."+strconv.Itoa(j), "-c", pane.CurrentPath)
 				if err := runner.Run(cmd); err != nil {
 					return fmt.Errorf("failed to split window: %v", err)
 				}
 
 			}
 			cmd := exec.Command("tmux", "send-keys",
-				"-t", strconv.Itoa(i+1)+"."+strconv.Itoa(j+1), pane.Command, "C-m")
+				"-t", s.Name+":"+strconv.Itoa(i+1)+"."+strconv.Itoa(j+1), pane.Command, "C-m")
 			if err := runner.Run(cmd); err != nil {
 				return fmt.Errorf("failed to run pane command: %v", err)
 			}
