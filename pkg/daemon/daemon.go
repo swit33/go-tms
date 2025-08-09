@@ -13,18 +13,13 @@ import (
 	"time"
 )
 
-func RunDaemon() {
+func RunDaemon(cfg *config.Config) {
 	file, err := createLockFile()
 	if err != nil {
 		fmt.Printf("Error: %v\n", err)
 		return
 	}
 	defer releaseLockFile(file)
-	cfg, err := config.LoadConfig()
-	if err != nil {
-		sendMsg("Failed to start auto-save daemon: " + err.Error())
-		return
-	}
 	signals := make(chan os.Signal, 1)
 	signal.Notify(signals, syscall.SIGINT, syscall.SIGTERM)
 
