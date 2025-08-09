@@ -106,6 +106,40 @@ func CreateNewSession(sessionName string, directory string, runner interfaces.Ru
 	return sessionName, nil
 }
 
+func SwitchSession(sessionName string, runner interfaces.Runner) error {
+	cmd := exec.Command("tmux", "switch-client", "-t", sessionName)
+	if err := runner.Run(cmd); err != nil {
+		return fmt.Errorf("failed to switch to session: %v sessionname: %s", err, sessionName)
+	}
+	return nil
+}
+
+func CreateBootSession(sessionName string, executable string, runner interfaces.Runner) (string, error) {
+	var cmd *exec.Cmd
+	cmd = exec.Command("tmux", "new-session", "-d", "-s", sessionName, executable)
+	if err := runner.Run(cmd); err != nil {
+		return "", fmt.Errorf("failed to create new session: %v", err)
+	}
+	return sessionName, nil
+}
+
+func AttachSession(sessionName string, runner interfaces.Runner) error {
+	var cmd *exec.Cmd
+	if sessionName == "" {
+		cmd = exec.Command("tmux", "attach-session")
+		cmd.Stdin = os.Stdin
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+	} else {
+		cmd = exec.Command("tmux", "attach-session", "-t", sessionName)
+	}
+	fmt.Println(cmd)
+	if err := runner.Run(cmd); err != nil {
+		return fmt.Errorf("failed to attach to session: %v sessionname: %s", err, sessionName)
+	}
+	return nil
+}
+
 func RestoreSession(s *session.Session, runner interfaces.Runner) error {
 	if _, err := CreateNewSession(s.Name, s.CurrentPath, runner); err != nil {
 		return err
@@ -146,14 +180,6 @@ func RestoreSession(s *session.Session, runner interfaces.Runner) error {
 				return fmt.Errorf("failed to run pane command: %v", err)
 			}
 		}
-	}
-	return nil
-}
-
-func SwitchSession(sessionName string, runner interfaces.Runner) error {
-	cmd := exec.Command("tmux", "switch-client", "-t", sessionName)
-	if err := runner.Run(cmd); err != nil {
-		return fmt.Errorf("failed to attach to session: %v sessionname: %s", err, sessionName)
 	}
 	return nil
 }
