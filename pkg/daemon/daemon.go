@@ -13,6 +13,17 @@ import (
 	"time"
 )
 
+func StartDaemon(cfg *config.Config) {
+	self, err := os.Executable()
+	if err != nil {
+		fmt.Printf("Error: %v\n", err)
+		return
+	}
+	cmd := exec.Command(self, "-daemon-internal")
+	cmd.Start()
+	return
+}
+
 func RunDaemon(cfg *config.Config) {
 	file, err := createLockFile()
 	if err != nil {

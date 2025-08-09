@@ -18,7 +18,7 @@ func RunBoot() error {
 		}
 	}
 	sessions := strings.TrimSpace(string(output))
-	self := os.Args[0]
+	self := os.Args[0] + " -s"
 
 	if sessions == "" {
 		_, err := tmux.CreateBootSession("go-tms-startup", self, interfaces.OsRunner{})
@@ -30,11 +30,13 @@ func RunBoot() error {
 		if err != nil {
 			return err
 		}
+		return nil
 	} else {
 		err = tmux.AttachSession("", interfaces.OsRunner{})
 		if err != nil {
 			return err
 		}
+		return nil
 	}
 	return nil
 }
