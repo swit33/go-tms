@@ -2,6 +2,8 @@ package boot
 
 import (
 	"fmt"
+	"go-tms/pkg/config"
+	"go-tms/pkg/daemon"
 	"go-tms/pkg/interfaces"
 	"go-tms/pkg/tmux"
 	"os"
@@ -9,7 +11,7 @@ import (
 	"strings"
 )
 
-func RunBoot() error {
+func RunBoot(cfg *config.Config) error {
 	cmd := exec.Command("tmux", "list-sessions")
 	output, err := cmd.Output()
 	if err != nil {
@@ -21,6 +23,8 @@ func RunBoot() error {
 	self := os.Args[0] + " -s"
 
 	if sessions == "" {
+		daemon.StartDaemon(cfg)
+
 		_, err := tmux.CreateBootSession("go-tms-startup", self, interfaces.OsRunner{})
 		if err != nil {
 			return err

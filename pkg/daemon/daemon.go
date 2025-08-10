@@ -19,7 +19,7 @@ func StartDaemon(cfg *config.Config) {
 		fmt.Printf("Error: %v\n", err)
 		return
 	}
-	cmd := exec.Command(self, "-daemon-internal")
+	cmd := exec.Command(self, "-d")
 	cmd.Start()
 	return
 }
@@ -34,18 +34,36 @@ func RunDaemon(cfg *config.Config) {
 	signals := make(chan os.Signal, 1)
 	signal.Notify(signals, syscall.SIGINT, syscall.SIGTERM)
 
-	ticker := time.NewTicker(time.Duration(cfg.AutoSaveIntervalMinutes) * time.Minute)
-	defer ticker.Stop()
+	autosaveTicker := time.NewTicker(time.Duration(cfg.AutoSaveIntervalMinutes) * time.Minute)
+	defer autosaveTicker.Stop()
+
+	monitorTicker := time.NewTicker(10 * time.Second)
+	defer monitorTicker.Stop()
 
 	for {
 		select {
 		case sig := <-signals:
 			fmt.Printf("Received signal '%s'. Shutting down daemon...\n", sig.String())
 			return
-		case <-ticker.C:
+		case <-monitorTicker.C:
+			if !isTmuxServerRunning() {
+				fmt.Println("Tmux server is not running. Shutting down daemon.")
+				saveSessions()
+				return
+			}
+		case <-autosaveTicker.C:
 			saveSessions()
 		}
 	}
+}
+
+func isTmuxServerRunning() bool {
+	cmd := exec.Command("tmux", "list-sessions")
+	err := cmd.Run()
+	if err != nil {
+		return false
+	}
+	return true
 }
 
 func saveSessions() {

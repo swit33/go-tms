@@ -12,7 +12,6 @@ import (
 func main() {
 
 	daemonMode := flag.Bool("d", false, "Run in daemon mode with autosave enabled")
-	daemonInternalMode := flag.Bool("daemon-internal", false, "Run in daemon mode with autosave enabled")
 	bootMode := flag.Bool("b", false, "Run in boot mode")
 	switcherMode := flag.Bool("s", false, "Run in switcher mode")
 
@@ -24,16 +23,12 @@ func main() {
 	}
 
 	if *daemonMode {
-		daemon.StartDaemon(&cfg)
-		return
-	}
-	if *daemonInternalMode {
 		daemon.RunDaemon(&cfg)
 		return
 	}
 
 	if *bootMode {
-		err := boot.RunBoot()
+		err := boot.RunBoot(&cfg)
 		if err != nil {
 			handlers.HandleError(err)
 		}
