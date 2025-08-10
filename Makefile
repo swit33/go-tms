@@ -8,7 +8,7 @@ LDFLAGS = -ldflags="-s -w"
 
 .PHONY: all clean linux darwin
 
-all: linux darwin
+all: linux darwin gh-release
 
 linux:
 	@echo "Building for Linux (x64_86)..."
@@ -28,3 +28,9 @@ clean:
 	rm -rf $(RELEASE_DIR)
 	@echo "Cleanup complete."
 
+gh-release:
+	@echo "Creating release..."
+	mkdir -p $(RELEASE_DIR)/gh
+	@cp $(RELEASE_DIR)/darwin/$(APP_NAME) $(RELEASE_DIR)/gh/$(APP_NAME)_darwin
+	@cp $(RELEASE_DIR)/x64_86/$(APP_NAME) $(RELEASE_DIR)/gh/$(APP_NAME)_linux
+	@echo "Release created."
