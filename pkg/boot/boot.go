@@ -42,5 +42,4 @@ func RunBoot(cfg *config.Config) error {
 		}
 		return nil
 	}
-	return nil
 }
