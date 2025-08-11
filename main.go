@@ -120,6 +120,9 @@ func handleZoxide(sessions *[]session.Session, cfg *config.Config) error {
 	if err != nil {
 		return err
 	}
+	if result.IsAction && result.Action == fzf.ActionReturn {
+		return runSwitcher(cfg)
+	}
 	return handleSessionLogic(true, result.Arg, sessions)
 }
 

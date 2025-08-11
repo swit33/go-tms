@@ -25,6 +25,7 @@ const (
 	ActionDelete      Action = ActionPrefix + "delete"
 	ActionInteractive Action = ActionPrefix + "interactive"
 	ActionSave        Action = ActionPrefix + "save"
+	ActionReturn      Action = ActionPrefix + "return"
 )
 
 type Result struct {
@@ -103,7 +104,7 @@ func RunZoxide(cfg *config.Config) (Result, error) {
 	output, err := cmd.Output()
 	if err != nil {
 		if exitErr, ok := err.(*exec.ExitError); ok && exitErr.ExitCode() == 130 {
-			os.Exit(0)
+			return Result{IsAction: true, Action: ActionReturn}, nil
 		}
 		return Result{}, fmt.Errorf("zoxide command failed: %v", err)
 	}
