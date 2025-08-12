@@ -1,4 +1,4 @@
-module go-tms
+module github.com/swit33/go-tms
 
 go 1.24.5
 
