@@ -89,12 +89,20 @@ func handleResult(result fzf.Result, sessions *[]session.Session, cfg *config.Co
 		case fzf.ActionInteractive:
 			return handleZoxide(sessions, cfg)
 		case fzf.ActionSave:
-			return session.SaveSessionsToDisk(*sessions)
+			return handleSave(sessions, cfg)
 		}
 	} else {
 		return handleSessionLogic(false, result.SessionName, sessions, cfg)
 	}
 	return nil
+}
+
+func handleSave(sessions *[]session.Session, cfg *config.Config) error {
+	err := session.SaveSessionsToDisk(*sessions)
+	if err != nil {
+		return err
+	}
+	return runSwitcher(cfg)
 }
 
 func handleSessionLogic(ispath bool, identifier string, sessions *[]session.Session, cfg *config.Config) error {
