@@ -2,9 +2,9 @@ package tmux
 
 import (
 	"fmt"
-	"go-tms/pkg/config"
-	"go-tms/pkg/interfaces"
-	"go-tms/pkg/session"
+	"github.com/swit33/go-tms/pkg/config"
+	"github.com/swit33/go-tms/pkg/interfaces"
+	"github.com/swit33/go-tms/pkg/session"
 	"os"
 	"os/exec"
 	"slices"

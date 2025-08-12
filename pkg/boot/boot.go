@@ -2,10 +2,10 @@ package boot
 
 import (
 	"fmt"
-	"go-tms/pkg/config"
-	"go-tms/pkg/daemon"
-	"go-tms/pkg/interfaces"
-	"go-tms/pkg/tmux"
+	"github.com/swit33/go-tms/pkg/config"
+	"github.com/swit33/go-tms/pkg/daemon"
+	"github.com/swit33/go-tms/pkg/interfaces"
+	"github.com/swit33/go-tms/pkg/tmux"
 	"os"
 	"os/exec"
 	"strings"

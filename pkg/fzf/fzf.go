@@ -2,8 +2,8 @@ package fzf
 
 import (
 	"fmt"
-	"go-tms/pkg/config"
-	"go-tms/pkg/session"
+	"github.com/swit33/go-tms/pkg/config"
+	"github.com/swit33/go-tms/pkg/session"
 	"os"
 	"os/exec"
 	"strings"

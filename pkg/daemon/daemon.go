@@ -2,9 +2,9 @@ package daemon
 
 import (
 	"fmt"
-	"go-tms/pkg/config"
-	"go-tms/pkg/session"
-	"go-tms/pkg/tmux"
+	"github.com/swit33/go-tms/pkg/config"
+	"github.com/swit33/go-tms/pkg/session"
+	"github.com/swit33/go-tms/pkg/tmux"
 	"os"
 	"os/exec"
 	"os/signal"
