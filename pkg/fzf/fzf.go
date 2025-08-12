@@ -9,11 +9,6 @@ import (
 	"strings"
 )
 
-var fzfHeader = []string{
-	"--header",
-	"<C-n>: new session\n<C-d>: delete session\n<C-i>: interactive search\n<C-s>: save session",
-}
-
 var fzfPrompt string = "Sessions> "
 
 const ActionPrefix = "gotms_act_"
@@ -45,16 +40,16 @@ func Run(entries []string, cfg *config.Config) (string, error) {
 		fmt.Sprintf("--bind=%s:become(echo '%s:{}')", cfg.FZFBindInteractive, ActionInteractive))
 	binds = append(binds,
 		fmt.Sprintf("--bind=%s:become(echo '%s:{}')", cfg.FZFBindSave, ActionSave))
-	var header []string
-	header = append(header, "--header")
-	header = append(header,
+	var footer []string
+	footer = append(footer, "--footer")
+	footer = append(footer,
 		fmt.Sprintf("<%s>: new session\n<%s>: delete session\n<%s>: interactive search\n<%s>: save session",
 			cfg.FZFBindNew, cfg.FZFBindDelete, cfg.FZFBindInteractive, cfg.FZFBindSave))
 	args := []string{}
 	args = append(args, strings.Fields(cfg.FZFOpts)...)
 	args = append(args, binds...)
 	args = append(args, "--prompt", cfg.FZFPrompt)
-	args = append(args, header...)
+	args = append(args, footer...)
 	cmd := exec.Command("fzf", args...)
 	cmd.Stdin = strings.NewReader(strings.Join(entries, "\n"))
 	output, err := cmd.Output()

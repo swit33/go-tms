@@ -1,6 +1,7 @@
 package tmux
 
 import (
+	"go-tms/pkg/config"
 	"go-tms/pkg/interfaces"
 	"go-tms/pkg/session"
 	"testing"
@@ -137,7 +138,9 @@ func TestRestoreSession(t *testing.T) {
 		runner := &interfaces.MockRunner{}
 		testSession := testCase.Session
 		expectedCommands := testCase.ExpectedCmd
-		err := RestoreSession(testSession, runner)
+		cfg := &config.Config{}
+		cfg.ProgramWhitelist = "nvim"
+		err := RestoreSession(testSession, runner, cfg)
 		if err != nil {
 			t.Errorf("RestoreSession() in case %s error = %v", testCase.Name, err)
 		}

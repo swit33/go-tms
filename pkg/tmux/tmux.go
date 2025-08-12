@@ -2,10 +2,12 @@ package tmux
 
 import (
 	"fmt"
+	"go-tms/pkg/config"
 	"go-tms/pkg/interfaces"
 	"go-tms/pkg/session"
 	"os"
 	"os/exec"
+	"slices"
 	"strconv"
 	"strings"
 )
@@ -140,7 +142,7 @@ func AttachSession(sessionName string, runner interfaces.Runner) error {
 	return nil
 }
 
-func RestoreSession(s *session.Session, runner interfaces.Runner) error {
+func RestoreSession(s *session.Session, runner interfaces.Runner, cfg *config.Config) error {
 	if _, err := CreateNewSession(s.Name, s.CurrentPath, runner); err != nil {
 		return err
 	}
@@ -174,10 +176,18 @@ func RestoreSession(s *session.Session, runner interfaces.Runner) error {
 				}
 
 			}
-			cmd := exec.Command("tmux", "send-keys",
-				"-t", s.Name+":"+strconv.Itoa(i+1)+"."+strconv.Itoa(j+1), pane.Command, "C-m")
-			if err := runner.Run(cmd); err != nil {
-				return fmt.Errorf("failed to run pane command: %v", err)
+			if slices.Contains(strings.Split(cfg.ProgramWhitelist, ","), pane.Command) {
+				var cmd *exec.Cmd
+				if pane.Command == "nvim" && cfg.NvimCustomCommand != "" {
+					cmd = exec.Command("tmux", "send-keys",
+						"-t", s.Name+":"+strconv.Itoa(i+1)+"."+strconv.Itoa(j+1), cfg.NvimCustomCommand, "C-m")
+				} else {
+					cmd = exec.Command("tmux", "send-keys",
+						"-t", s.Name+":"+strconv.Itoa(i+1)+"."+strconv.Itoa(j+1), pane.Command, "C-m")
+				}
+				if err := runner.Run(cmd); err != nil {
+					return fmt.Errorf("failed to run pane command: %v", err)
+				}
 			}
 		}
 	}

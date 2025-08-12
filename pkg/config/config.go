@@ -1,12 +1,13 @@
 package config
 
 import (
-	"gopkg.in/yaml.v3"
 	"os"
 	"path/filepath"
+
+	"gopkg.in/yaml.v3"
 )
 
-var configPath string = filepath.Join(".config", "go-tms", "config.yaml")
+var configPath string = filepath.Join("go-tms", "config.yaml")
 
 type Config struct {
 	AutoSaveIntervalMinutes int    `yaml:"auto-save-interval-minutes"`
@@ -15,17 +16,20 @@ type Config struct {
 	FZFBindInteractive      string `yaml:"fzf-bind-interactive"`
 	FZFBindSave             string `yaml:"fzf-bind-save"`
 	FZFPrompt               string `yaml:"fzf-prompt"`
-	FZFOpts                 string `yaml:"fzf-env"`
-	ZoxideOpts              string `yaml:"zoxide-env"`
+	FZFOpts                 string `yaml:"fzf-opts"`
+	ZoxideOpts              string `yaml:"zoxide-opts"`
+	ProgramWhitelist        string `yaml:"program-whitelist"`
+	NvimCustomCommand       string `yaml:"nvim-custom-command"`
 }
 
-func GetConfigPath() (string, error) {
-	configDir, err := os.UserConfigDir()
+func getConfigPath() (string, error) {
+	homeDir, err := os.UserHomeDir()
 	if err != nil {
 		return "", err
 	}
-	configAbsPath := filepath.Join(configDir, configPath)
-	return configAbsPath, nil
+
+	xdgConfigPath := filepath.Join(homeDir, ".config", configPath)
+	return xdgConfigPath, nil
 }
 
 func LoadConfig() (Config, error) {
@@ -38,9 +42,11 @@ func LoadConfig() (Config, error) {
 		FZFPrompt:               "Sessions> ",
 		FZFOpts:                 "--no-sort --reverse",
 		ZoxideOpts:              "--layout=reverse --style=full --border=bold --border=rounded --margin=3%",
+		ProgramWhitelist:        "btop,vim,nvim,yazi",
+		NvimCustomCommand:       "",
 	}
 
-	configFilePath, err := GetConfigPath()
+	configFilePath, err := getConfigPath()
 	if err != nil {
 		return config, err
 	}

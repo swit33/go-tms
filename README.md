@@ -66,6 +66,8 @@ Here are the configurable options and their default values:
 | `fzf-prompt`            | The prompt displayed by fzf in the session switcher.                     | ` Sessions>  `  |
 | `fzf-env`               | Additional options passed to fzf.                                        | `--no-sort --reverse` |
 | `zoxide-env`            | Options for zoxide integration (if used for directory suggestions).      | `--layout=reverse --style=full --border=bold --border=rounded --margin=3%` |
+| `program-whitelist`      | List of programs be restored.                                        | `btop,vim,nvim` |
+| `nvim-custom-command`   | Custom command to run when opening a pane in nvim.                     | `nvim -c 'lua pcall(require(\"auto-session\").RestoreSession())'` |
 
 ### Example `config.yaml`
 

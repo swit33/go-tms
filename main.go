@@ -92,12 +92,12 @@ func handleResult(result fzf.Result, sessions *[]session.Session, cfg *config.Co
 			return session.SaveSessionsToDisk(*sessions)
 		}
 	} else {
-		return handleSessionLogic(false, result.SessionName, sessions)
+		return handleSessionLogic(false, result.SessionName, sessions, cfg)
 	}
 	return nil
 }
 
-func handleSessionLogic(ispath bool, identifier string, sessions *[]session.Session) error {
+func handleSessionLogic(ispath bool, identifier string, sessions *[]session.Session, cfg *config.Config) error {
 	runner := interfaces.OsRunner{}
 
 	sessionName, err := tmux.CheckIfSessionExists(ispath, identifier)
@@ -109,7 +109,7 @@ func handleSessionLogic(ispath bool, identifier string, sessions *[]session.Sess
 	}
 	sessionInstance, err := session.GetSessionByName(identifier, *sessions)
 	if err == nil {
-		return tmux.RestoreSession(sessionInstance, interfaces.OsRunner{})
+		return tmux.RestoreSession(sessionInstance, interfaces.OsRunner{}, cfg)
 	}
 
 	return handleActionNew(identifier, sessions)
@@ -123,7 +123,7 @@ func handleZoxide(sessions *[]session.Session, cfg *config.Config) error {
 	if result.IsAction && result.Action == fzf.ActionReturn {
 		return runSwitcher(cfg)
 	}
-	return handleSessionLogic(true, result.Arg, sessions)
+	return handleSessionLogic(true, result.Arg, sessions, cfg)
 }
 
 func handleActionNew(path string, sessions *[]session.Session) error {
