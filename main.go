@@ -4,6 +4,12 @@ import (
 	"bufio"
 	"flag"
 	"fmt"
+	"os"
+	"path/filepath"
+	"regexp"
+	"runtime/debug"
+	"strings"
+
 	"github.com/swit33/go-tms/pkg/boot"
 	"github.com/swit33/go-tms/pkg/config"
 	"github.com/swit33/go-tms/pkg/daemon"
@@ -11,10 +17,6 @@ import (
 	"github.com/swit33/go-tms/pkg/interfaces"
 	"github.com/swit33/go-tms/pkg/session"
 	"github.com/swit33/go-tms/pkg/tmux"
-	"os"
-	"path/filepath"
-	"regexp"
-	"strings"
 )
 
 func main() {
@@ -52,7 +54,7 @@ func main() {
 	}
 
 	if *version {
-		fmt.Println("go-tms v0.13.3")
+		printVersion()
 		return
 	}
 }
@@ -254,5 +256,19 @@ func handleError(err error) {
 		fmt.Println("Press Enter to continue...")
 		scanner := bufio.NewScanner(os.Stdin)
 		scanner.Scan()
+	}
+}
+
+func printVersion() {
+	buildInfo, ok := debug.ReadBuildInfo()
+	if !ok {
+		fmt.Println("Unable to determine version information.")
+		return
+	}
+
+	if buildInfo.Main.Version != "" {
+		fmt.Printf("Version: %s\n", buildInfo.Main.Version)
+	} else {
+		fmt.Println("Version: unknown")
 	}
 }
