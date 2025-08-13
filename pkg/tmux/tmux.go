@@ -200,6 +200,7 @@ func RestoreSession(s *session.Session, runner interfaces.Runner, cfg *config.Co
 				}
 			}
 		}
+		// TODO: debug this not always working
 		if cfg.SelectFirst {
 			cmd := exec.Command("tmux", "select-window", "-t", "1")
 			if err := runner.Run(cmd); err != nil {

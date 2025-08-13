@@ -43,7 +43,7 @@ func LoadConfig() (Config, error) {
 		FZFBindDelete:           "ctrl-d",
 		FZFBindInteractive:      "ctrl-i",
 		FZFBindSave:             "ctrl-s",
-		FZFBindKill:             "ctrl-k",
+		FZFBindKill:             "ctrl-x",
 		FZFPrompt:               "Sessions> ",
 		FZFOpts:                 "--no-sort --reverse",
 		ZoxideOpts:              "--layout=reverse --style=full --border=bold --border=rounded --margin=3%",
