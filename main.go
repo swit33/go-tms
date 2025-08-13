@@ -52,7 +52,7 @@ func main() {
 	}
 
 	if *version {
-		fmt.Println("go-tms v0.13.2")
+		fmt.Println("go-tms v0.13.3")
 		return
 	}
 }
