@@ -13,6 +13,8 @@ var fzfPrompt string = "Sessions> "
 
 const ActionPrefix = "gotms_act_"
 
+// const TmuxActivePrefix = " "
+
 type Action string
 
 const (
@@ -73,7 +75,11 @@ func Run(entries []string, cfg *config.Config) (string, error) {
 func RunSessions(s []session.Session, cfg *config.Config) (Result, error) {
 	entries := make([]string, 0)
 	for _, s := range s {
-		entries = append(entries, s.Name)
+		if s.TmuxActive {
+			entries = append(entries, cfg.ActiveSessionPrefix+s.Name)
+		} else {
+			entries = append(entries, s.Name)
+		}
 	}
 	result, err := Run(entries, cfg)
 	if err != nil {
@@ -86,9 +92,15 @@ func RunSessions(s []session.Session, cfg *config.Config) (Result, error) {
 
 	if strings.HasPrefix(result, ActionPrefix) {
 		parts := strings.Split(result, ":")
+		if strings.HasPrefix(parts[1], cfg.ActiveSessionPrefix) {
+			parts[1] = parts[1][len(cfg.ActiveSessionPrefix):]
+		}
 		return Result{IsAction: true, Action: Action(parts[0]), Arg: parts[1]}, nil
 	}
 	sessionName := strings.TrimSpace(string(result))
+	if strings.HasPrefix(sessionName, cfg.ActiveSessionPrefix) {
+		sessionName = sessionName[len(cfg.ActiveSessionPrefix):]
+	}
 	return Result{IsAction: false, SessionName: sessionName}, nil
 }
 

@@ -69,33 +69,28 @@ func isTmuxServerRunning() bool {
 func saveSessions() {
 	tmuxSessions, err := tmux.ListSessions()
 	if err != nil {
-		sendMsg("Failed to list tmux sessions.")
+		tmux.SendMsg("Failed to list tmux sessions.")
 		return
 	}
 
 	savedSessions, err := session.LoadSessionsFromDisk()
 	if err != nil {
-		sendMsg("Failed to load sessions from disk.")
+		tmux.SendMsg("Failed to load sessions from disk.")
 		return
 	}
 
 	combinedSessions, err := session.CombineSessions(tmuxSessions, savedSessions)
 	if err != nil {
-		sendMsg("Failed to combine sessions.")
+		tmux.SendMsg("Failed to combine sessions.")
 		return
 	}
 
 	err = session.SaveSessionsToDisk(combinedSessions)
 	if err != nil {
-		sendMsg("Failed to save sessions to disk.")
+		tmux.SendMsg("Failed to save sessions to disk.")
 	} else {
-		sendMsg("Sessions saved successfully.")
+		tmux.SendMsg("Sessions saved successfully.")
 	}
-}
-
-func sendMsg(msg string) {
-	cmd := exec.Command("tmux", "display-message", msg)
-	cmd.Run()
 }
 
 const lockFileName = "go-tms.lock"

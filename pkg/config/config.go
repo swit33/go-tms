@@ -22,6 +22,7 @@ type Config struct {
 	NvimCustomCommand       string `yaml:"nvim-custom-command"`
 	SelectFirst             bool   `yaml:"select-first"`
 	CloseOnNew              bool   `yaml:"close-on-new"`
+	ActiveSessionPrefix     string `yaml:"active-session-prefix"`
 }
 
 func getConfigPath() (string, error) {
@@ -48,6 +49,7 @@ func LoadConfig() (Config, error) {
 		NvimCustomCommand:       "",
 		SelectFirst:             true,
 		CloseOnNew:              true,
+		ActiveSessionPrefix:     " ",
 	}
 
 	configFilePath, err := getConfigPath()

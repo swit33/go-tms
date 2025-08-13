@@ -65,6 +65,7 @@ func ListSessions() ([]session.Session, error) {
 			sessionInst = &session.Session{
 				Name:        sessionName,
 				CurrentPath: sessionPath,
+				TmuxActive:  true,
 			}
 			sessionsMap[sessionName] = sessionInst
 		}
@@ -245,4 +246,9 @@ func DeleteSession(sessionName string) error {
 	}
 	return nil
 
+}
+
+func SendMsg(msg string) {
+	cmd := exec.Command("tmux", "display-message", msg)
+	cmd.Run()
 }

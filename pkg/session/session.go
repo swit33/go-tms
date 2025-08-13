@@ -23,6 +23,7 @@ type Session struct {
 	Name        string   `yaml:"name"`
 	Windows     []Window `yaml:"windows"`
 	CurrentPath string   `yaml:"current-path"`
+	TmuxActive  bool     `yaml:"-"`
 }
 
 var sessionStorePath string = filepath.Join(".tmux", "go-tms", "sessions.yaml")
