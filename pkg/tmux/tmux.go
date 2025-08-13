@@ -108,6 +108,15 @@ func CreateNewSession(sessionName string, directory string, runner interfaces.Ru
 	return sessionName, nil
 }
 
+func CloseCurrentWindow(runner interfaces.Runner) error {
+	var cmd *exec.Cmd
+	cmd = exec.Command("tmux", "kill-window")
+	if err := runner.Run(cmd); err != nil {
+		return fmt.Errorf("failed to close current window: %v", err)
+	}
+	return nil
+}
+
 func SwitchSession(sessionName string, runner interfaces.Runner) error {
 	cmd := exec.Command("tmux", "switch-client", "-t", sessionName)
 	if err := runner.Run(cmd); err != nil {

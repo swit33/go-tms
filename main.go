@@ -89,7 +89,7 @@ func handleResult(result fzf.Result, sessions *[]session.Session, cfg *config.Co
 			if err != nil {
 				return err
 			}
-			return handleActionNew(cwd, sessions)
+			return handleActionNew(cwd, sessions, cfg)
 		case fzf.ActionDelete:
 			return handleActionDelete(result, sessions, cfg)
 		case fzf.ActionInteractive:
@@ -126,7 +126,7 @@ func handleSessionLogic(ispath bool, identifier string, sessions *[]session.Sess
 		return tmux.RestoreSession(sessionInstance, interfaces.OsRunner{}, cfg)
 	}
 
-	return handleActionNew(identifier, sessions)
+	return handleActionNew(identifier, sessions, cfg)
 }
 
 func handleZoxide(sessions *[]session.Session, cfg *config.Config) error {
@@ -140,12 +140,18 @@ func handleZoxide(sessions *[]session.Session, cfg *config.Config) error {
 	return handleSessionLogic(true, result.Arg, sessions, cfg)
 }
 
-func handleActionNew(path string, sessions *[]session.Session) error {
+func handleActionNew(path string, sessions *[]session.Session, cfg *config.Config) error {
 	runner := interfaces.OsRunner{}
 
 	name, err := findUniqueSessionName(path, *sessions)
 	if err != nil {
 		return err
+	}
+	if cfg.CloseOnNew {
+		err = tmux.CloseCurrentWindow(runner)
+		if err != nil {
+			return err
+		}
 	}
 	sessionName, err := tmux.CreateNewSession(name, path, runner)
 	if err != nil {

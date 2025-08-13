@@ -21,6 +21,7 @@ type Config struct {
 	ProgramWhitelist        string `yaml:"program-whitelist"`
 	NvimCustomCommand       string `yaml:"nvim-custom-command"`
 	SelectFirst             bool   `yaml:"select-first"`
+	CloseOnNew              bool   `yaml:"close-on-new"`
 }
 
 func getConfigPath() (string, error) {
@@ -46,6 +47,7 @@ func LoadConfig() (Config, error) {
 		ProgramWhitelist:        "btop,vim,nvim,yazi",
 		NvimCustomCommand:       "",
 		SelectFirst:             true,
+		CloseOnNew:              true,
 	}
 
 	configFilePath, err := getConfigPath()
