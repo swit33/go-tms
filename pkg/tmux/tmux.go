@@ -190,6 +190,12 @@ func RestoreSession(s *session.Session, runner interfaces.Runner, cfg *config.Co
 				}
 			}
 		}
+		if cfg.SelectFirst {
+			cmd := exec.Command("tmux", "select-window", "-t", "1")
+			if err := runner.Run(cmd); err != nil {
+				return fmt.Errorf("failed to select window: %v", err)
+			}
+		}
 	}
 	return nil
 }

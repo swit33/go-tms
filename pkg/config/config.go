@@ -20,6 +20,7 @@ type Config struct {
 	ZoxideOpts              string `yaml:"zoxide-opts"`
 	ProgramWhitelist        string `yaml:"program-whitelist"`
 	NvimCustomCommand       string `yaml:"nvim-custom-command"`
+	SelectFirst             bool   `yaml:"select-first"`
 }
 
 func getConfigPath() (string, error) {
@@ -44,6 +45,7 @@ func LoadConfig() (Config, error) {
 		ZoxideOpts:              "--layout=reverse --style=full --border=bold --border=rounded --margin=3%",
 		ProgramWhitelist:        "btop,vim,nvim,yazi",
 		NvimCustomCommand:       "",
+		SelectFirst:             true,
 	}
 
 	configFilePath, err := getConfigPath()

@@ -22,6 +22,7 @@ func main() {
 	daemonMode := flag.Bool("d", false, "Run in daemon mode with autosave enabled")
 	bootMode := flag.Bool("b", false, "Run in boot mode")
 	switcherMode := flag.Bool("s", false, "Run in switcher mode")
+	version := flag.Bool("V", false, "Print version")
 
 	flag.Parse()
 
@@ -48,6 +49,11 @@ func main() {
 		if err != nil {
 			handleError(err)
 		}
+	}
+
+	if *version {
+		fmt.Println("go-tms v0.13.2")
+		return
 	}
 }
 
