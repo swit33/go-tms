@@ -22,6 +22,7 @@ const (
 	ActionDelete      Action = ActionPrefix + "delete"
 	ActionInteractive Action = ActionPrefix + "interactive"
 	ActionSave        Action = ActionPrefix + "save"
+	ActionKill        Action = ActionPrefix + "kill"
 	ActionReturn      Action = ActionPrefix + "return"
 )
 
@@ -42,11 +43,13 @@ func Run(entries []string, cfg *config.Config) (string, error) {
 		fmt.Sprintf("--bind=%s:become(echo '%s:{}')", cfg.FZFBindInteractive, ActionInteractive))
 	binds = append(binds,
 		fmt.Sprintf("--bind=%s:become(echo '%s:{}')", cfg.FZFBindSave, ActionSave))
+	binds = append(binds,
+		fmt.Sprintf("--bind=%s:become(echo '%s:{}')", cfg.FZFBindKill, ActionKill))
 	var footer []string
 	footer = append(footer, "--footer")
 	footer = append(footer,
-		fmt.Sprintf("<%s>: new session\n<%s>: delete session\n<%s>: interactive search\n<%s>: save session",
-			cfg.FZFBindNew, cfg.FZFBindDelete, cfg.FZFBindInteractive, cfg.FZFBindSave))
+		fmt.Sprintf("<%s>: new session\n<%s>: delete session\n<%s>: interactive search\n<%s>: save session\n<%s>: kill session",
+			cfg.FZFBindNew, cfg.FZFBindDelete, cfg.FZFBindInteractive, cfg.FZFBindSave, cfg.FZFBindKill))
 	args := []string{}
 	args = append(args, strings.Fields(cfg.FZFOpts)...)
 	args = append(args, binds...)

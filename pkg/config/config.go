@@ -15,6 +15,7 @@ type Config struct {
 	FZFBindDelete           string `yaml:"fzf-bind-delete"`
 	FZFBindInteractive      string `yaml:"fzf-bind-interactive"`
 	FZFBindSave             string `yaml:"fzf-bind-save"`
+	FZFBindKill             string `yaml:"fzf-bind-kill"`
 	FZFPrompt               string `yaml:"fzf-prompt"`
 	FZFOpts                 string `yaml:"fzf-opts"`
 	ZoxideOpts              string `yaml:"zoxide-opts"`
@@ -42,6 +43,7 @@ func LoadConfig() (Config, error) {
 		FZFBindDelete:           "ctrl-d",
 		FZFBindInteractive:      "ctrl-i",
 		FZFBindSave:             "ctrl-s",
+		FZFBindKill:             "ctrl-k",
 		FZFPrompt:               "Sessions> ",
 		FZFOpts:                 "--no-sort --reverse",
 		ZoxideOpts:              "--layout=reverse --style=full --border=bold --border=rounded --margin=3%",

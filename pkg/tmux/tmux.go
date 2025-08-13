@@ -248,6 +248,14 @@ func DeleteSession(sessionName string) error {
 
 }
 
+func KillSession(sessionName string) error {
+	cmd := exec.Command("tmux", "kill-session", "-t", sessionName)
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("failed to kill session: %v", err)
+	}
+	return nil
+}
+
 func SendMsg(msg string) {
 	cmd := exec.Command("tmux", "display-message", msg)
 	cmd.Run()

@@ -96,6 +96,8 @@ func handleResult(result fzf.Result, sessions *[]session.Session, cfg *config.Co
 			return handleZoxide(sessions, cfg)
 		case fzf.ActionSave:
 			return handleSave(sessions, cfg)
+		case fzf.ActionKill:
+			return handleActionKill(result, sessions, cfg)
 		}
 	} else {
 		return handleSessionLogic(false, result.SessionName, sessions, cfg)
@@ -195,6 +197,22 @@ func handleActionDelete(result fzf.Result, sessions *[]session.Session, cfg *con
 		return err
 	}
 
+	return runSwitcher(cfg)
+}
+
+func handleActionKill(result fzf.Result, sessions *[]session.Session, cfg *config.Config) error {
+	var err error
+	sessionName := result.Arg
+	sessionName, err = tmux.CheckIfSessionExists(false, sessionName)
+	if err != nil {
+		return err
+	}
+	if sessionName != "" {
+		err = tmux.KillSession(sessionName)
+		if err != nil {
+			return err
+		}
+	}
 	return runSwitcher(cfg)
 }
 
