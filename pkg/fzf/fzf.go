@@ -56,7 +56,9 @@ func Run(entries []string, cfg *config.Config) (string, error) {
 	args = append(args, "--prompt", cfg.FZFPrompt)
 	args = append(args, footer...)
 	cmd := exec.Command("fzf", args...)
-	cmd.Stdin = strings.NewReader(strings.Join(entries, "\n"))
+	if len(entries) != 0 {
+		cmd.Stdin = strings.NewReader(strings.Join(entries, "\n"))
+	}
 	output, err := cmd.Output()
 	if err != nil {
 		if exitErr, ok := err.(*exec.ExitError); ok && exitErr.ExitCode() == 1 {

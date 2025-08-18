@@ -25,7 +25,7 @@ func RunBoot(cfg *config.Config) error {
 	if sessions == "" {
 		daemon.StartDaemon(cfg)
 
-		_, err := tmux.CreateBootSession("go-tms-startup", self, interfaces.OsRunner{})
+		_, err = tmux.CreateBootSession("go-tms-startup", self, interfaces.OsRunner{})
 		if err != nil {
 			return err
 		}
