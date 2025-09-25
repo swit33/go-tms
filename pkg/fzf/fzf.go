@@ -9,8 +9,6 @@ import (
 	"strings"
 )
 
-var fzfPrompt string = "Sessions> "
-
 const ActionPrefix = "gotms_act_"
 
 // const TmuxActivePrefix = " "
