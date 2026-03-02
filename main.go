@@ -23,6 +23,7 @@ func main() {
 
 	daemonMode := flag.Bool("d", false, "Run in daemon mode with autosave enabled")
 	bootMode := flag.Bool("b", false, "Run in boot mode")
+	bootNoDaemon := flag.Bool("B", false, "Run in boot mode without daemon")
 	switcherMode := flag.Bool("s", false, "Run in switcher mode")
 	version := flag.Bool("V", false, "Print version")
 
@@ -39,7 +40,15 @@ func main() {
 	}
 
 	if *bootMode {
-		err := boot.RunBoot(&cfg)
+		err := boot.RunBoot(&cfg, true)
+		if err != nil {
+			handleError(err)
+		}
+		return
+	}
+
+	if *bootNoDaemon {
+		err := boot.RunBoot(&cfg, false)
 		if err != nil {
 			handleError(err)
 		}
