@@ -21,7 +21,6 @@ func StartDaemon(cfg *config.Config) {
 	}
 	cmd := exec.Command(self, "-d")
 	cmd.Start()
-	return
 }
 
 func RunDaemon(cfg *config.Config) {
@@ -48,11 +47,11 @@ func RunDaemon(cfg *config.Config) {
 		case <-monitorTicker.C:
 			if !isTmuxServerRunning() {
 				fmt.Println("Tmux server is not running. Shutting down daemon.")
-				saveSessions()
+				saveSessions(cfg)
 				return
 			}
 		case <-autosaveTicker.C:
-			saveSessions()
+			saveSessions(cfg)
 		}
 	}
 }
@@ -66,8 +65,8 @@ func isTmuxServerRunning() bool {
 	return true
 }
 
-func saveSessions() {
-	tmuxSessions, err := tmux.ListSessions()
+func saveSessions(cfg *config.Config) {
+	tmuxSessions, err := tmux.ListSessions(cfg)
 	if err != nil {
 		tmux.SendMsg("Failed to list tmux sessions.")
 		return

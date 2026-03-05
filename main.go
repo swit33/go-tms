@@ -73,7 +73,7 @@ func runSwitcher(cfg *config.Config) error {
 	if err != nil {
 		return err
 	}
-	tmuxSessions, err := tmux.ListSessions()
+	tmuxSessions, err := tmux.ListSessions(cfg)
 	if err != nil {
 		return err
 	}
@@ -108,7 +108,7 @@ func handleResult(result fzf.Result, sessions *[]session.Session, cfg *config.Co
 		case fzf.ActionSave:
 			return handleSave(sessions, cfg)
 		case fzf.ActionKill:
-			return handleActionKill(result, sessions, cfg)
+			return handleActionKill(result, cfg)
 		}
 	} else {
 		return handleSessionLogic(false, result.SessionName, sessions, cfg)
@@ -173,7 +173,7 @@ func handleActionNew(path string, sessions *[]session.Session, cfg *config.Confi
 	if err := tmux.SwitchSession(sessionName, runner); err != nil {
 		return err
 	}
-	tmuxSessions, err := tmux.ListSessions()
+	tmuxSessions, err := tmux.ListSessions(cfg)
 	if err != nil {
 		return err
 	}
@@ -211,7 +211,8 @@ func handleActionDelete(result fzf.Result, sessions *[]session.Session, cfg *con
 	return runSwitcher(cfg)
 }
 
-func handleActionKill(result fzf.Result, sessions *[]session.Session, cfg *config.Config) error {
+// func handleActionKill(result fzf.Result, sessions *[]session.Session, cfg *config.Config) error {
+func handleActionKill(result fzf.Result, cfg *config.Config) error {
 	var err error
 	sessionName := result.Arg
 	sessionName, err = tmux.CheckIfSessionExists(false, sessionName)

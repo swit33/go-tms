@@ -24,6 +24,7 @@ type Config struct {
 	SelectFirst             bool   `yaml:"select-first"`
 	CloseOnNew              bool   `yaml:"close-on-new"`
 	ActiveSessionPrefix     string `yaml:"active-session-prefix"`
+	IgnoreHome              bool   `yaml:"ignore-home"`
 }
 
 func getConfigPath() (string, error) {
@@ -52,6 +53,7 @@ func LoadConfig() (Config, error) {
 		SelectFirst:             true,
 		CloseOnNew:              true,
 		ActiveSessionPrefix:     " ",
+		IgnoreHome:              false,
 	}
 
 	configFilePath, err := getConfigPath()

@@ -12,7 +12,7 @@ import (
 	"strings"
 )
 
-func ListSessions() ([]session.Session, error) {
+func ListSessions(cfg *config.Config) ([]session.Session, error) {
 	var output []byte
 	var err error
 
@@ -46,7 +46,7 @@ func ListSessions() ([]session.Session, error) {
 			return nil, fmt.Errorf("failed to get user home dir: %v", err)
 		}
 
-		if sessionPath == userHomeDir {
+		if sessionPath == userHomeDir && cfg.IgnoreHome {
 			continue
 		}
 		if sessionPath == "/dev/null" {
